@@ -3,6 +3,8 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Login from './src/screens/Login';
 import Signup from './src/screens/Signup';
 import Home from './src/screens/Home';
+import CreateClass from './src/screens/CreateClass';
+import ClassDetails from './src/screens/ClassDetails';
 // Create a stack navigator for handling screen transitions
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +22,8 @@ const App = () => {
         />
         <Stack.Screen name='Signup' component={Signup} />
         <Stack.Screen name='Home' component={Home} />
+        <Stack.Screen name='CreateClass' component={CreateClass} />
+        <Stack.Screen name='ClassDetails' component={ClassDetails} />
       </Stack.Navigator>
     </NavigationContainer>
   );

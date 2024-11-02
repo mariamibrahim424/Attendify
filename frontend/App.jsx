@@ -1,10 +1,10 @@
-// Import the stuff we need from React Native and React Navigation
-import { Text, SafeAreaView } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Login from './src/screens/Login'; // Grab the Login screen
-import Home from './src/screens/Home'; // Grab the Home screen
-
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import Login from './src/screens/Login';
+import Signup from './src/screens/Signup';
+import Home from './src/screens/Home';
+import CreateClass from './src/screens/CreateClass';
+import ClassDetails from './src/screens/ClassDetails';
 // Create a stack navigator for handling screen transitions
 const Stack = createNativeStackNavigator();
 
@@ -15,10 +15,15 @@ const App = () => {
     <NavigationContainer>
       {/* Setting stack navigator(Helps with screen management) */}
       <Stack.Navigator initialRouteName='Login'>
-        {/* Login screen */}
-        <Stack.Screen name='Login' component={Login} />
-        {/* Temporary Home screen for after they login */}
+        <Stack.Screen
+          name='Login'
+          component={Login}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen name='Signup' component={Signup} />
         <Stack.Screen name='Home' component={Home} />
+        <Stack.Screen name='CreateClass' component={CreateClass} />
+        <Stack.Screen name='ClassDetails' component={ClassDetails} />
       </Stack.Navigator>
     </NavigationContainer>
   );

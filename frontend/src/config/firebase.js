@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc, getDocs } from 'firebase/firestore'; // Import Firestore functions
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc } from 'firebase/firestore'; // Import Firestore functions
 import { getAnalytics, isSupported } from "firebase/analytics";
 
 // Your Firebase configuration
@@ -29,11 +29,19 @@ isSupported().then((supported) => {
   }
 });
 
+// Utility function to get the current user
+const getCurrentUser = () => {
+  const currentUser = FB_AUTH.currentUser;
+  if (!currentUser) {
+    console.error("No user is currently logged in");
+  }
+  return currentUser;
+};
+
 // Function to add a new class to Firestore
 export const addClass = async (classData) => {
   try {
-    // Include the current user's ID in the class data
-    const currentUser = FB_AUTH.currentUser;
+    const currentUser = getCurrentUser();
     if (currentUser) {
       classData.userId = currentUser.uid; // Add user ID to class data
     }
@@ -47,7 +55,7 @@ export const addClass = async (classData) => {
 // Function to fetch classes for the current user
 export const fetchClassesForUser = async () => {
   try {
-    const currentUser = FB_AUTH.currentUser;
+    const currentUser = getCurrentUser();
     if (!currentUser) return []; // Return empty if no user is logged in
 
     const classesCollection = collection(FB_DB, 'classes');
@@ -59,6 +67,40 @@ export const fetchClassesForUser = async () => {
     return classList;
   } catch (error) {
     console.error("Error fetching classes: ", error);
+    return [];
+  }
+};
+
+// Function to add a student to a specific class
+export const addStudent = async (classId, studentData) => {
+  try {
+    const docRef = await addDoc(collection(FB_DB, `classes/${classId}/students`), studentData);
+    console.log("Student added with ID: ", docRef.id);
+  } catch (error) {
+    console.error("Error adding student: ", error);
+  }
+};
+
+//Function to update students
+export const updateStudent = async (studentId, updatedData) => {
+  try {
+    const studentDocRef = doc(FB_DB, `students/${studentId}`);
+    await updateDoc(studentDocRef, updatedData);
+    console.log("Student updated successfully!");
+  } catch (error) {
+    console.error("Error updating student: ", error);
+  }
+};
+
+// Function to fetch students for a specific class
+export const fetchStudentsForClass = async (classId) => {
+  try {
+    const studentsCollection = collection(FB_DB, `classes/${classId}/students`);
+    const studentSnapshot = await getDocs(studentsCollection);
+    const studentList = studentSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return studentList;
+  } catch (error) {
+    console.error("Error fetching students: ", error);
     return [];
   }
 };

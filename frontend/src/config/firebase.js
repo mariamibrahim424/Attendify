@@ -1,10 +1,10 @@
 // Import the functions you need from the SDKs
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc } from 'firebase/firestore'; // Import Firestore functions
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc} from 'firebase/firestore'; // Import Firestore functions
 import { getAnalytics, isSupported } from "firebase/analytics";
 
-// Your Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyB7tnx-pFwo75icLdZXY0sKfMUNjGPkF4A",
   authDomain: "rollcall-7a79f.firebaseapp.com",
@@ -47,10 +47,23 @@ export const addClass = async (classData) => {
     }
     const docRef = await addDoc(collection(FB_DB, 'classes'), classData);
     console.log("Class added with ID: ", docRef.id);
+    return docRef.id;
   } catch (error) {
     console.error("Error adding class: ", error);
   }
 };
+
+// Function to add a new class to Firestore
+export const deleteClass = async (classId) => {
+  try {
+    // No need for userId in delete operation
+    const docRef = await deleteDoc(doc(collection(FB_DB, 'classes'), classId)); // Reference the specific document
+    console.log("Class deleted with ID: ", classId); // Log the deleted class ID
+  } catch (error) {
+    console.error("Error deleting class: ", error); // Update error message
+  }
+};
+
 
 // Function to fetch classes for the current user
 export const fetchClassesForUser = async () => {

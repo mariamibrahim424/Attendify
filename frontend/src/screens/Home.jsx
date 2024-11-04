@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, SafeAreaView, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // for icons
-import { useNavigation, useRoute } from '@react-navigation/native'; // Import navigation hook and route
+import { useNavigation } from '@react-navigation/native'; // Import navigation hook
+import { fetchClassesForUser } from '../config/firebase'; // Import the fetchClassesForUser function from your firebase config
 
 const Home = () => {
   const [classes, setClasses] = useState([]);
   const [currentDate, setCurrentDate] = useState('');
   const navigation = useNavigation(); // Initialize navigation
-  const route = useRoute(); // Initialize route to access params
 
   useEffect(() => {
     // Set the current date and time
@@ -16,15 +16,16 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    // Check for new class data when component mounts or updates
-    if (route.params?.newClass) {
-      setClasses((prevClasses) => [...prevClasses, route.params.newClass]); // Update classes state with new class
-    }
-  }, [route.params]);
+    const loadClasses = async () => {
+      const classList = await fetchClassesForUser(); // Fetch classes for the current user from Firestore
+      setClasses(classList); // Set classes state
+    };
+    loadClasses(); // Call the function to load classes
+  }, []);
 
   // Function to navigate to the CreateClass screen
   const goToAddClass = () => {
-    navigation.navigate('CreateClass'); // Updated to navigate to CreateClass
+    navigation.navigate('CreateClass'); // Navigate to CreateClass
   };
 
   return (
@@ -32,7 +33,7 @@ const Home = () => {
       {/* Header */}
       <View style={styles.header}>
         <Ionicons name="arrow-back" size={24} color="black" />
-        <Text style={styles.headerText}>HOME</Text>
+        <Text style={styles.headerText}>Shut up Mariam (Home Home)</Text>
         <Ionicons name="person-circle-outline" size={24} color="black" />
       </View>
 
@@ -63,7 +64,7 @@ const Home = () => {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.classItem}
-            onPress={() => navigation.navigate('ClassDetails', { classId: item.id, className: item.name })} // Updated to navigate to ClassDetails
+            onPress={() => navigation.navigate('ClassDetails', { classId: item.id, className: item.name })} // Navigate to ClassDetails
           >
             <View style={styles.classIcon}>
               <Text style={styles.classIconText}>C{item.id}</Text>

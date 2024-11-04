@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, SafeAreaView, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { addClass } from '../config/firebase'; // Adjust the import path as needed
 
 const CreateClass = ({ navigation }) => {
   const [className, setClassName] = useState('');
@@ -15,17 +16,21 @@ const CreateClass = ({ navigation }) => {
     }
   };
 
-  const saveClass = () => {
+  const saveClass = async () => {
     if (className && ageGroup) {
-      navigation.navigate('Home', {
-        newClass: {
-          id: (Math.random() * 1000).toString(),
-          name: className,
-          ageGroup: ageGroup,
-          startDate: startDate.toISOString(), // Include the start date
-        },
-      });
-      // Removed navigation.goBack(); since navigate already handles it.
+      const newClass = {
+        name: className,
+        ageGroup: ageGroup,
+        startDate: startDate.toISOString(), // Include the start date
+      };
+
+      try {
+        await addClass(newClass); // Call the Firestore function to save the class
+        navigation.navigate('Home');
+      } catch (error) {
+        console.error("Error adding class: ", error);
+        alert('Error saving class. Please try again.');
+      }
     } else {
       alert('Please fill in all fields'); // Added alert for validation
     }

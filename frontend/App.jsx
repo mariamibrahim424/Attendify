@@ -5,6 +5,9 @@ import Signup from './src/screens/Signup';
 import Home from './src/screens/Home';
 import CreateClass from './src/screens/CreateClass';
 import ClassDetails from './src/screens/ClassDetails';
+import AddStudent from './src/screens/AddStudent';
+
+
 // Create a stack navigator for handling screen transitions
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +27,7 @@ const App = () => {
         <Stack.Screen name='Home' component={Home} />
         <Stack.Screen name='CreateClass' component={CreateClass} />
         <Stack.Screen name='ClassDetails' component={ClassDetails} />
+        <Stack.Screen name='AddStudent' component={AddStudent} />
       </Stack.Navigator>
     </NavigationContainer>
   );

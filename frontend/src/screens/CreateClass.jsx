@@ -46,65 +46,116 @@ const CreateClass = ({navigation}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.label}>Class Name</Text>
-      <TextInput
-        style={styles.input}
-        placeholder='Enter class name'
-        value={className}
-        onChangeText={setClassName}
-      />
+      <Text style={styles.header}>Create New Class</Text>
 
-      <Text style={styles.label}>Age Group</Text>
-      <TextInput
-        style={styles.input}
-        placeholder='Enter age group (e.g. 5-7 years)'
-        value={ageGroup}
-        onChangeText={setAgeGroup}
-      />
-
-      <Text style={styles.label}>Start Time</Text>
-      <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-        <View style={styles.dateButton}>
-          <Text style={styles.dateButtonText}>{startDate.toDateString()}</Text>
-          <Text style={styles.dateButtonText}>
-            {startDate.toLocaleTimeString()}
-          </Text>
-        </View>
-      </TouchableOpacity>
-
-      {showDatePicker && (
-        <DateTimePicker
-          value={startDate}
-          mode='datetime'
-          display='default'
-          onChange={onDateChange}
+      <View style={styles.formContainer}>
+        <Text style={styles.label}>Class Name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder='Enter class name'
+          value={className}
+          onChangeText={setClassName}
         />
-      )}
 
-      <Button title='Save Class' onPress={saveClass} />
+        <Text style={styles.label}>Age Group</Text>
+        <TextInput
+          style={styles.input}
+          placeholder='Enter age group (e.g. 5-7 years)'
+          value={ageGroup}
+          onChangeText={setAgeGroup}
+        />
+
+        <Text style={styles.label}>Start Time</Text>
+        <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+          <View style={styles.dateButton}>
+            <Text style={styles.dateButtonText}>
+              {startDate.toDateString()}
+            </Text>
+            <Text style={styles.dateButtonText}>
+              {startDate.toLocaleTimeString()}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={startDate}
+            mode='datetime'
+            display='default'
+            onChange={onDateChange}
+          />
+        )}
+
+        <TouchableOpacity style={styles.saveButton} onPress={saveClass}>
+          <Text style={styles.saveButtonText}>Save Class</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, padding: 20, backgroundColor: '#f5f5f5'},
-  label: {fontSize: 16, fontWeight: 'bold', marginVertical: 5},
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#00796b',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  formContainer: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 8,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 5,
+  },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
     marginBottom: 20,
+    backgroundColor: '#fafafa',
   },
   dateButton: {
-    padding: 10,
+    padding: 12,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    backgroundColor: '#e6e6e6',
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#fafafa',
     marginBottom: 20,
+    alignItems: 'center',
   },
-  dateButtonText: {fontSize: 16},
+  dateButtonText: {
+    fontSize: 16,
+    color: '#00796b',
+  },
+  saveButton: {
+    backgroundColor: '#00796b',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
 });
 
 export default CreateClass;

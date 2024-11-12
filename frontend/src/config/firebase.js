@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc} from 'firebase/firestore'; // Import Firestore functions
 import { getAnalytics, isSupported } from "firebase/analytics";
+import { getStorage } from 'firebase/storage';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -21,6 +22,8 @@ export const app = initializeApp(firebaseConfig);
 // Initialize Firebase Authentication and Firestore
 export const FB_AUTH = getAuth(app);
 export const FB_DB = getFirestore(app);
+export const FB_S = getStorage(app);
+
 
 // Conditionally initialize Firebase Analytics (only if supported)
 isSupported().then((supported) => {
@@ -47,6 +50,7 @@ export const addClass = async (classData) => {
     }
     const docRef = await addDoc(collection(FB_DB, 'classes'), classData);
     console.log("Class added with ID: ", docRef.id);
+    console.log(docRef);
     return docRef.id;
   } catch (error) {
     console.error("Error adding class: ", error);
@@ -93,6 +97,22 @@ export const addStudent = async (classId, studentData) => {
     console.error("Error adding student: ", error);
   }
 };
+
+// Function to delete a student from Firestore
+export const deleteStudent = async (classId, studentId) => {
+  try {
+    // Get a reference to the specific student document by classId and studentId
+    const docRef = doc(FB_DB, `classes/${classId}/students`, studentId);
+
+    // Delete the specific student document
+    await deleteDoc(docRef);
+    
+    console.log("Student deleted with ID: ", studentId);
+  } catch (error) {
+    console.error("Error deleting student: ", error); // Update error message
+  }
+};
+
 
 //Function to update students
 export const updateStudent = async (studentId, updatedData) => {

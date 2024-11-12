@@ -8,6 +8,7 @@ import CreateClass from './src/screens/CreateClass';
 import ClassDetails from './src/screens/ClassDetails';
 import AddStudent from './src/screens/AddStudent';
 import EditStudent from './src/screens/EditStudent';
+import TakeAttendance from './src/screens/TakeAttendance';
 
 // Create a stack navigator for handling screen transitions
 const Stack = createNativeStackNavigator();
@@ -31,6 +32,7 @@ const App = () => {
           <Stack.Screen name='ClassDetails' component={ClassDetails} />
           <Stack.Screen name='AddStudent' component={AddStudent} />
           <Stack.Screen name='EditStudent' component={EditStudent} />
+          <Stack.Screen name='TakeAttendance' component={TakeAttendance} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

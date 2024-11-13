@@ -24,7 +24,7 @@ const TakeAttendance = () => {
       setStudents(studentList);
     };
     loadStudents();
-  }, [classId]);
+  }, []);
 
   // Function to toggle student selection
   const toggleSelection = (studentId) => {
@@ -76,50 +76,39 @@ const TakeAttendance = () => {
         data={students}
         keyExtractor={(item) => item.id}
         renderItem={({item}) => (
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('EditStudent', {
-                studentId: item.id,
-                initialName: item.name,
-                initialBirthday: new Date(item.birthday),
-                // Pass other fields to edit, like attendance and participation
-              })
-            }
-          >
-            <View style={styles.studentItem}>
-              <View style={styles.studentInfoContainer}>
-                {/* Student Icon */}
-                <View style={styles.studentIcon}>
-                  <Text style={styles.studentIconText}>C{item.id}</Text>
-                </View>
-
-                {/* Student Name and Details */}
-                <View style={styles.studentDetailsContainer}>
-                  <Text style={styles.studentName}>{item.name}</Text>
-                  <Text style={styles.studentDetails}>
-                    Birthday: {item.birthday}
-                  </Text>
-                </View>
-
-                {/* Checkbox (Right side of each student) */}
-                <TouchableOpacity
-                  style={styles.checkboxContainer}
-                  onPress={() => toggleSelection(item.id)}
-                >
-                  <View
-                    style={[
-                      styles.checkbox,
-                      selectedStudents.has(item.id) && styles.checkboxSelected,
-                    ]}
-                  >
-                    {selectedStudents.has(item.id) && (
-                      <Ionicons name='checkmark' size={20} color='white' />
-                    )}
-                  </View>
-                </TouchableOpacity>
+          <View style={styles.studentItem}>
+            <View style={styles.studentInfoContainer}>
+              {/* Student Icon */}
+              <View style={styles.studentIcon}>
+                <Text style={styles.studentIconText}>C{item.id}</Text>
               </View>
+
+              {/* Student Name and Details */}
+              <View style={styles.studentDetailsContainer}>
+                <Text style={styles.studentName}>{item.name}</Text>
+                <Text style={styles.studentDetails}>
+                  Birthday: {item.birthday}
+                </Text>
+              </View>
+
+              {/* Checkbox (Right side of each student) */}
+              <TouchableOpacity
+                style={styles.checkboxContainer}
+                onPress={() => toggleSelection(item.id)}
+              >
+                <View
+                  style={[
+                    styles.checkbox,
+                    selectedStudents.has(item.id) && styles.checkboxSelected,
+                  ]}
+                >
+                  {selectedStudents.has(item.id) && (
+                    <Ionicons name='checkmark' size={15} color='white' />
+                  )}
+                </View>
+              </TouchableOpacity>
             </View>
-          </TouchableOpacity>
+          </View>
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No Students Added Yet</Text>

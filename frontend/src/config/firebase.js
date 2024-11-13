@@ -150,3 +150,24 @@ export const fetchUsers = async () => {
     return [];
   }
 };
+
+// Function to take attendance
+
+export const takeAttendance = async (attendanceDataArray) => {
+  try {
+    // Initialize a batch
+    const batch = writeBatch(FB_DB);
+
+    // Loop through the array of attendance data and add each to the batch
+    attendanceDataArray.forEach((attendanceData) => {
+      const attendanceRef = doc(collection(FB_DB, 'attendance')); // Create a new reference for each attendance document
+      batch.set(attendanceRef, attendanceData); // Add the 'set' operation to the batch
+    });
+
+    // Commit the batch to Firestore
+    await batch.commit();
+    console.log('Attendance records added successfully');
+  } catch (error) {
+    console.error('Error taking attendance: ', error);
+  }
+};

@@ -10,6 +10,7 @@ import {
 import {Ionicons} from '@expo/vector-icons';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {fetchStudentsForClass} from '../config/firebase'; // Assuming a function to fetch students
+import {takeAttendance} from '../config/firebase'; // Adjust the import path as needed
 
 const TakeAttendance = () => {
   const [students, setStudents] = useState([]);
@@ -40,22 +41,30 @@ const TakeAttendance = () => {
   };
 
   // Handle Submit Attendance
-  const handleSubmitAttendance = () => {
-    if (selectedStudents.size === 0) {
-      Alert.alert(
-        'No Students Selected',
-        'Please select at least one student to mark attendance.',
-      );
-    } else {
-      // Assuming a function to submit the attendance, here is a mock for illustration
-      console.log('Submitting Attendance for:', Array.from(selectedStudents));
+  const handleSubmitAttendance = async () => {
+    const timeStamp = new Date();
+    const allStudentsIds = new Set(students.map((item) => item.id));
+    const attendanceData = [];
+    for (let id of allStudentsIds) {
+      const present = selectedStudents.has(id);
 
-      // Here you can add the logic to record the attendance in your system
-      Alert.alert(
-        'Attendance Submitted',
-        `${selectedStudents.size} students marked as present.`,
-      );
+      attendanceData.push({
+        classId: classId,
+        timeStamp: timeStamp,
+        studentId: id,
+        present: present,
+      });
     }
+    try {
+      const classId = await takeAttendance(attendanceData); // Call the Firestore function to save the class
+      navigation.navigate('ClassDetails', {classId});
+    } catch (error) {
+      console.error('Error submitting attendance: ', error);
+    }
+    Alert.alert(
+      'Attendance Submitted',
+      `${selectedStudents.size} students marked as present.`,
+    );
   };
 
   return (
@@ -70,7 +79,6 @@ const TakeAttendance = () => {
         <Text style={styles.topTitle}>Top Student</Text>
         <Text style={styles.topStudent}>Mariam (Sample)</Text>
       </View>
-
       {/* Student List */}
       <FlatList
         data={students}

@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, writeBatch} from 'firebase/firestore'; // Import Firestore functions
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, writeBatch, getDoc } from 'firebase/firestore'; // <-- Add getDoc here
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getStorage } from 'firebase/storage';
 
@@ -23,7 +23,6 @@ export const app = initializeApp(firebaseConfig);
 export const FB_AUTH = getAuth(app);
 export const FB_DB = getFirestore(app);
 export const FB_S = getStorage(app);
-
 
 // Conditionally initialize Firebase Analytics (only if supported)
 isSupported().then((supported) => {
@@ -50,24 +49,22 @@ export const addClass = async (classData) => {
     }
     const docRef = await addDoc(collection(FB_DB, 'classes'), classData);
     console.log("Class added with ID: ", docRef.id);
-    console.log(docRef);
     return docRef.id;
   } catch (error) {
     console.error("Error adding class: ", error);
   }
 };
 
-// Function to add a new class to Firestore
+// Function to delete a class from Firestore
 export const deleteClass = async (classId) => {
   try {
-    // No need for userId in delete operation
-    const docRef = await deleteDoc(doc(collection(FB_DB, 'classes'), classId)); // Reference the specific document
-    console.log("Class deleted with ID: ", classId); // Log the deleted class ID
+    const docRef = doc(FB_DB, 'classes', classId); // Reference the class document
+    await deleteDoc(docRef); // Delete the class document
+    console.log("Class deleted with ID: ", classId);
   } catch (error) {
-    console.error("Error deleting class: ", error); // Update error message
+    console.error("Error deleting class: ", error);
   }
 };
-
 
 // Function to fetch classes for the current user
 export const fetchClassesForUser = async () => {
@@ -101,23 +98,18 @@ export const addStudent = async (classId, studentData) => {
 // Function to delete a student from Firestore
 export const deleteStudent = async (classId, studentId) => {
   try {
-    // Get a reference to the specific student document by classId and studentId
-    const docRef = doc(FB_DB, `classes/${classId}/students`, studentId);
-
-    // Delete the specific student document
+    const docRef = doc(FB_DB, `classes/${classId}/students`, studentId); // Reference to the student document
     await deleteDoc(docRef);
-    
     console.log("Student deleted with ID: ", studentId);
   } catch (error) {
-    console.error("Error deleting student: ", error); // Update error message
+    console.error("Error deleting student: ", error);
   }
 };
 
-
-//Function to update students
-export const updateStudent = async (studentId, updatedData) => {
+// Function to update student details
+export const updateStudent = async (classId, studentId, updatedData) => {
   try {
-    const studentDocRef = doc(FB_DB, `students/${studentId}`);
+    const studentDocRef = doc(FB_DB, `classes/${classId}/students`, studentId); // Reference to the student document
     await updateDoc(studentDocRef, updatedData);
     console.log("Student updated successfully!");
   } catch (error) {
@@ -138,6 +130,79 @@ export const fetchStudentsForClass = async (classId) => {
   }
 };
 
+// Function to take attendance for students in a class
+export const takeAttendance = async (attendanceDataArray) => {
+  try {
+    const batch = writeBatch(FB_DB); // Initialize batch to write multiple documents
+
+    for (const attendanceData of attendanceDataArray) {
+      // Fetch student name by studentId
+      const studentDocRef = doc(FB_DB, 'classes', attendanceData.classId, 'students', attendanceData.studentId);
+      const studentDoc = await getDoc(studentDocRef);
+      const studentName = studentDoc.exists() ? studentDoc.data().name : 'Unknown'; // Default to 'Unknown' if name not found
+
+      // Fetch the current attendance count for the student
+      const attendanceRef = collection(FB_DB, 'classes', attendanceData.classId, 'attendance');
+      const studentAttendanceSnapshot = await getDocs(attendanceRef);
+      let attendanceCount = 0;
+
+      // Loop through the student's previous attendance records to count them
+      studentAttendanceSnapshot.docs.forEach(doc => {
+        const record = doc.data();
+        if (record.studentId === attendanceData.studentId) {
+          attendanceCount += 1; // Increment count for each record found
+        }
+      });
+
+      // Add student name and attendance count to attendance data
+      const updatedAttendanceData = {
+        ...attendanceData,
+        studentName,
+        attendanceCount: attendanceCount + 1, // Increment attendance count by 1
+      };
+
+      // Add the updated attendance data to the Firestore batch operation
+      const attendanceDocRef = doc(collection(FB_DB, 'classes', attendanceData.classId, 'attendance'));
+      batch.set(attendanceDocRef, updatedAttendanceData); // Add the student attendance data to batch
+
+    }
+
+    await batch.commit(); // Commit the batch operation
+    console.log('Attendance records added successfully');
+  } catch (error) {
+    console.error('Error taking attendance: ', error);
+    throw error; // Throw error so it can be caught in the component
+  }
+};
+
+
+// Function to fetch attendance records for a class
+export const fetchAttendanceRecords = async (classId) => {
+  const attendanceRef = collection(FB_DB, 'classes', classId, 'attendance'); // Reference the attendance collection
+  const snapshot = await getDocs(attendanceRef);
+  const records = [];
+
+  for (let docSnap of snapshot.docs) {
+    const data = docSnap.data();
+    const studentRef = doc(FB_DB, 'classes', classId, 'students', data.studentId); // Reference the student document
+    const studentSnapshot = await getDoc(studentRef);
+    const studentName = studentSnapshot.exists() ? studentSnapshot.data().name : 'Unknown';
+
+    records.push({
+      ...data,
+      studentName: studentName, // Add student name to the attendance record
+      attendanceCount: data.attendanceCount || 0, // Ensure an attendance count is present (default to 0)
+    });
+  }
+
+  // Sort records by attendance count in descending order (best attendance first)
+  records.sort((a, b) => b.attendanceCount - a.attendanceCount);
+
+  return records;
+};
+
+
+
 // Function to fetch users from Firestore
 export const fetchUsers = async () => {
   try {
@@ -148,26 +213,5 @@ export const fetchUsers = async () => {
   } catch (error) {
     console.error("Error fetching users: ", error);
     return [];
-  }
-};
-
-// Function to take attendance
-
-export const takeAttendance = async (attendanceDataArray) => {
-  try {
-    // Initialize a batch
-    const batch = writeBatch(FB_DB);
-
-    // Loop through the array of attendance data and add each to the batch
-    attendanceDataArray.forEach((attendanceData) => {
-      const attendanceRef = doc(collection(FB_DB, 'attendance')); // Create a new reference for each attendance document
-      batch.set(attendanceRef, attendanceData); // Add the 'set' operation to the batch
-    });
-
-    // Commit the batch to Firestore
-    await batch.commit();
-    console.log('Attendance records added successfully');
-  } catch (error) {
-    console.error('Error taking attendance: ', error);
   }
 };

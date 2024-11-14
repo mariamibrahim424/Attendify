@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import {Ionicons} from '@expo/vector-icons';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {deleteStudent, fetchStudentsForClass} from '../config/firebase'; // Assuming a function to fetch students

@@ -56,16 +56,18 @@ const TakeAttendance = () => {
       });
     }
     try {
-      const classId = await takeAttendance(attendanceData); // Call the Firestore function to save the class
+      // Call the Firestore function to save the attendance
+      await takeAttendance(attendanceData);
+      Alert.alert(
+        'Attendance Submitted',
+        `${selectedStudents.size} students marked as present.`,
+      );
       navigation.navigate('ClassDetails', {classId});
     } catch (error) {
       console.error('Error submitting attendance: ', error);
     }
-    Alert.alert(
-      'Attendance Submitted',
-      `${selectedStudents.size} students marked as present.`,
-    );
   };
+
 
   return (
     <View style={styles.container}>

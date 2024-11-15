@@ -7,6 +7,7 @@ import { Picker } from '@react-native-picker/picker'; // Make sure this is the c
 const AttendanceSheet = () => {
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
+  const [uniqueDates, setUniqueDates] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(true); // Loading state to track fetching status
   const route = useRoute();
@@ -17,8 +18,21 @@ const AttendanceSheet = () => {
       try {
         setLoading(true); // Set loading to true when fetching starts
         const records = await fetchAttendanceRecords(classId);
-        setAttendanceRecords(records);
-        setFilteredRecords(records); // Initialize filtered records with all attendance records
+
+        // Ensure dates are stored in 'YYYY-MM-DD' format
+        const formattedRecords = records.map((record) => {
+          const formattedDate = record.date && !isNaN(new Date(record.date).getTime())
+            ? new Date(record.date).toISOString().split('T')[0]
+            : null;
+          return { ...record, date: formattedDate };
+        });
+
+        setAttendanceRecords(formattedRecords);
+        setFilteredRecords(formattedRecords); // Initialize filtered records with all attendance records
+
+        // Extract unique dates
+        const dates = [...new Set(formattedRecords.map((record) => record.date))];
+        setUniqueDates(dates);
       } catch (error) {
         console.error('Error fetching attendance records:', error);
       } finally {
@@ -27,6 +41,7 @@ const AttendanceSheet = () => {
     };
     loadAttendanceRecords();
   }, [classId]);
+
 
   // Function to filter attendance by date
   const filterByDate = (date) => {
@@ -62,7 +77,6 @@ const AttendanceSheet = () => {
     return sortedTally;
   };
 
-
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -87,15 +101,16 @@ const AttendanceSheet = () => {
               onValueChange={(itemValue) => filterByDate(itemValue)}
             >
               <Picker.Item label="All Dates" value={null} />
-              {attendanceRecords.map((record) => (
+              {uniqueDates.map((date, index) => (
                 <Picker.Item
-                  key={record.date} // Use the date as the key
-                  label={new Date(record.date).toLocaleDateString()}
-                  value={record.date}
+                  key={index} // Use index as the key
+                  label={new Date(date).toLocaleDateString()}
+                  value={date}
                 />
               ))}
             </Picker>
           </View>
+
           {/* Attendance Tally */}
           <FlatList
             data={tallyWeeklyAttendance()} // Display the attendance tally

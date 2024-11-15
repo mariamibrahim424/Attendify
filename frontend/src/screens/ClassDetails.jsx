@@ -85,7 +85,7 @@ const ClassDetails = () => {
       {/* Student List */}
       <FlatList
         data={students}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()} // Ensure unique keys
         renderItem={({item}) => (
           <Swipeable
             renderRightActions={() => renderRightActions(classId, item.id)}

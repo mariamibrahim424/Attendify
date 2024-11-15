@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs
 import { initializeApp } from "firebase/app";
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, writeBatch, getDoc } from 'firebase/firestore'; // <-- Add getDoc here
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, writeBatch, getDoc, query, where } from 'firebase/firestore'; // <-- Add query and where here
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getStorage } from 'firebase/storage';
 
@@ -175,33 +175,58 @@ export const takeAttendance = async (attendanceDataArray) => {
   }
 };
 
+// ** NEW FUNCTION ADDED TO GET TODAY'S ATTENDANCE **
+
+export const getTodayAttendance = async (classId) => {
+  const today = new Date();
+  const todayDateString = today.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+
+  try {
+    const attendanceRef = collection(FB_DB, 'classes', classId, 'attendance');
+    const q = query(attendanceRef, where("date", "==", todayDateString)); // Filter by today's date
+    const snapshot = await getDocs(q);
+
+    const todaysAttendance = [];
+    snapshot.forEach(doc => {
+      todaysAttendance.push(doc.data());
+    });
+
+    return todaysAttendance;
+  } catch (error) {
+    console.error('Error fetching today\'s attendance: ', error);
+    return [];
+  }
+};
 
 // Function to fetch attendance records for a class
 export const fetchAttendanceRecords = async (classId) => {
-  const attendanceRef = collection(FB_DB, 'classes', classId, 'attendance'); // Reference the attendance collection
+  const attendanceRef = collection(FB_DB, 'classes', classId, 'attendance');
   const snapshot = await getDocs(attendanceRef);
   const records = [];
 
   for (let docSnap of snapshot.docs) {
     const data = docSnap.data();
-    const studentRef = doc(FB_DB, 'classes', classId, 'students', data.studentId); // Reference the student document
+
+    // Check if date exists and format it to 'YYYY-MM-DD'
+    const parsedDate = data.date ? new Date(data.date) : null;
+    const formattedDate = parsedDate && !isNaN(parsedDate.getTime()) // Check for valid date
+      ? parsedDate.toISOString().split('T')[0]  // 'YYYY-MM-DD'
+      : null;
+
+    // Fetch student information
+    const studentRef = doc(FB_DB, 'classes', classId, 'students', data.studentId);
     const studentSnapshot = await getDoc(studentRef);
     const studentName = studentSnapshot.exists() ? studentSnapshot.data().name : 'Unknown';
 
     records.push({
       ...data,
-      studentName: studentName, // Add student name to the attendance record
-      attendanceCount: data.attendanceCount || 0, // Ensure an attendance count is present (default to 0)
+      date: formattedDate,  // Use the formatted date here
+      studentName: studentName,
+      attendanceCount: data.attendanceCount || 0,
     });
   }
-
-  // Sort records by attendance count in descending order (best attendance first)
-  records.sort((a, b) => b.attendanceCount - a.attendanceCount);
-
   return records;
 };
-
-
 
 // Function to fetch users from Firestore
 export const fetchUsers = async () => {

@@ -42,7 +42,8 @@ const TakeAttendance = () => {
 
   // Handle Submit Attendance
   const handleSubmitAttendance = async () => {
-    const timeStamp = new Date();
+    const today = new Date();
+    const timeStamp = today.toLocaleDateString();
     const allStudentsIds = new Set(students.map((item) => item.id));
     const attendanceData = [];
     for (let id of allStudentsIds) {
@@ -67,7 +68,6 @@ const TakeAttendance = () => {
       console.error('Error submitting attendance: ', error);
     }
   };
-
 
   return (
     <View style={styles.container}>

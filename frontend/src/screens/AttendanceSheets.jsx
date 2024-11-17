@@ -1,8 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useRoute } from '@react-navigation/native';
-import { fetchAttendanceRecords } from '../config/firebase'; // A function to fetch attendance records
-import { Picker } from '@react-native-picker/picker'; // Make sure this is the correct import
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import {useRoute} from '@react-navigation/native';
+import {fetchAttendanceRecords} from '../config/firebase'; // A function to fetch attendance records
+import {Picker} from '@react-native-picker/picker'; // Make sure this is the correct import
 
 const AttendanceSheet = () => {
   const [attendanceRecords, setAttendanceRecords] = useState([]);
@@ -11,7 +18,7 @@ const AttendanceSheet = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(true); // Loading state to track fetching status
   const route = useRoute();
-  const { classId, className } = route.params; // Getting class details from route params
+  const {classId, className} = route.params; // Getting class details from route params
 
   useEffect(() => {
     const loadAttendanceRecords = async () => {
@@ -19,20 +26,14 @@ const AttendanceSheet = () => {
         setLoading(true); // Set loading to true when fetching starts
         const records = await fetchAttendanceRecords(classId);
 
-        // Ensure dates are stored in 'YYYY-MM-DD' format
-        const formattedRecords = records.map((record) => {
-          const formattedDate = record.date && !isNaN(new Date(record.date).getTime())
-            ? new Date(record.date).toISOString().split('T')[0]
-            : null;
-          return { ...record, date: formattedDate };
-        });
-
-        setAttendanceRecords(formattedRecords);
-        setFilteredRecords(formattedRecords); // Initialize filtered records with all attendance records
+        setAttendanceRecords(records);
+        console.log('formattedRecords' + JSON.stringify(records, null, 2));
+        setFilteredRecords(records); // Initialize filtered records with all attendance records
 
         // Extract unique dates
-        const dates = [...new Set(formattedRecords.map((record) => record.date))];
+        const dates = [...new Set(records.map((record) => record.timeStamp))];
         setUniqueDates(dates);
+        console.log('Dates ' + dates);
       } catch (error) {
         console.error('Error fetching attendance records:', error);
       } finally {
@@ -42,13 +43,14 @@ const AttendanceSheet = () => {
     loadAttendanceRecords();
   }, [classId]);
 
-
   // Function to filter attendance by date
-  const filterByDate = (date) => {
-    setSelectedDate(date);
-    if (date) {
+  const filterByDate = (timeStamp) => {
+    setSelectedDate(timeStamp);
+    if (timeStamp) {
       // Filter records by the selected date
-      const filtered = attendanceRecords.filter((record) => record.date === date);
+      const filtered = attendanceRecords.filter(
+        (record) => record.timeStamp === timeStamp,
+      );
       setFilteredRecords(filtered);
     } else {
       setFilteredRecords(attendanceRecords); // If no date is selected, show all records
@@ -62,7 +64,7 @@ const AttendanceSheet = () => {
     // Loop through each attendance record and tally it
     attendanceRecords.forEach((record) => {
       if (!tallyMap.has(record.studentId)) {
-        tallyMap.set(record.studentId, { count: 0, name: record.studentName });
+        tallyMap.set(record.studentId, {count: 0, name: record.studentName});
       }
       if (record.present) {
         const tallyItem = tallyMap.get(record.studentId);
@@ -72,7 +74,9 @@ const AttendanceSheet = () => {
     });
 
     // Convert Map to Array for rendering and sort by attendance count (most to least)
-    const sortedTally = Array.from(tallyMap.values()).sort((a, b) => b.count - a.count);
+    const sortedTally = Array.from(tallyMap.values()).sort(
+      (a, b) => b.count - a.count,
+    );
 
     return sortedTally;
   };
@@ -87,7 +91,7 @@ const AttendanceSheet = () => {
       {/* Loading indicator while data is being fetched */}
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#00bfae" />
+          <ActivityIndicator size='large' color='#00bfae' />
           <Text style={styles.loadingText}>Loading Attendance...</Text>
         </View>
       ) : (
@@ -100,11 +104,11 @@ const AttendanceSheet = () => {
               style={styles.picker}
               onValueChange={(itemValue) => filterByDate(itemValue)}
             >
-              <Picker.Item label="All Dates" value={null} />
+              <Picker.Item label='All Dates' value={null} />
               {uniqueDates.map((date, index) => (
                 <Picker.Item
                   key={index} // Use index as the key
-                  label={new Date(date).toLocaleDateString()}
+                  label={date}
                   value={date}
                 />
               ))}
@@ -115,16 +119,20 @@ const AttendanceSheet = () => {
           <FlatList
             data={tallyWeeklyAttendance()} // Display the attendance tally
             keyExtractor={(item) => item.name} // Use the student name as a key
-            renderItem={({ item }) => (
+            renderItem={({item}) => (
               <TouchableOpacity style={styles.studentItem}>
                 <View style={styles.studentDetails}>
                   <Text style={styles.studentName}>{item.name}</Text>
-                  <Text style={styles.attendanceCount}>Days Present: {item.count}</Text>
+                  <Text style={styles.attendanceCount}>
+                    Days Present: {item.count}
+                  </Text>
                 </View>
               </TouchableOpacity>
             )}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>No Attendance Records Available</Text>
+              <Text style={styles.emptyText}>
+                No Attendance Records Available
+              </Text>
             }
           />
         </>
@@ -153,7 +161,7 @@ const styles = StyleSheet.create({
     color: '#00bfae',
     letterSpacing: 1,
     textShadowColor: '#1e6b67',
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 3,
   },
   dateFilter: {
@@ -170,7 +178,7 @@ const styles = StyleSheet.create({
   },
   picker: {
     height: 50,
-    width: 150,
+    width: 200,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
@@ -187,8 +195,8 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    transform: [{ translateX: 5 }],
+    shadowOffset: {width: 0, height: 3},
+    transform: [{translateX: 5}],
     overflow: 'hidden',
     borderLeftWidth: 5,
     borderLeftColor: '#00bfae',

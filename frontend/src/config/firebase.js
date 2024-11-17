@@ -210,7 +210,7 @@ export const fetchAttendanceRecords = async (classId) => {
       attendanceCount: data.attendanceCount || 0,
     });
   }
-  console.log("records"+JSON.stringify(records));
+  // console.log("records"+ JSON.stringify(records, null, 2));
   return records;
 };
 

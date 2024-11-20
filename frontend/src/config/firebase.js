@@ -4,16 +4,18 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, writeBatch, getDoc, query, where } from 'firebase/firestore'; // <-- Add query and where here
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getStorage } from 'firebase/storage';
+import { API_KEY, AUTH_DOMAIN, PROJECT_ID, STORAGE_BUCKET, MESSAGING_SENDER_ID, APP_ID, MEASUREMENT_ID } from '@env';
+
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyB7tnx-pFwo75icLdZXY0sKfMUNjGPkF4A",
-  authDomain: "rollcall-7a79f.firebaseapp.com",
-  projectId: "rollcall-7a79f",
-  storageBucket: "rollcall-7a79f.appspot.com",
-  messagingSenderId: "666843817191",
-  appId: "1:666843817191:web:72eea69d79dda144ecee42",
-  measurementId: "G-F3LZ47XL02"
+  apiKey: process.env.API_KEY,
+  authDomain: process.env.AUTH_DOMAIN,
+  projectId: process.env.PROJECT_ID,
+  storageBucket: process.env.STORAGE_BUCKET,
+  messagingSenderId: process.env.MESSAGING_SENDER_ID,
+  appId: process.env.APP_ID,
+  measurementId: process.env.MEASUREMENT_ID
 };
 
 // Initialize Firebase

@@ -1,10 +1,10 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import {Ionicons} from '@expo/vector-icons';
+import {Ionicons} from '@expo/vector-icons'; // Expo vector icons
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {deleteStudent, fetchStudentsForClass} from '../config/firebase'; // Assuming a function to fetch students
-import {GestureHandlerRootView, Swipeable} from 'react-native-gesture-handler'; // Import from the updated library
+import {Swipeable} from 'react-native-gesture-handler'; // Gesture handler for swipeable actions
+import {format} from 'date-fns';
 
 const ClassDetails = () => {
   const [students, setStudents] = useState([]);
@@ -85,7 +85,9 @@ const ClassDetails = () => {
       {/* Student List */}
       <FlatList
         data={students}
-        keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()} // Ensure unique keys
+        keyExtractor={(item) =>
+          item.id ? item.id.toString() : item.index.toString()
+        } // Ensure unique keys
         renderItem={({item}) => (
           <Swipeable
             renderRightActions={() => renderRightActions(classId, item.id)}
@@ -104,14 +106,20 @@ const ClassDetails = () => {
                 <View style={styles.studentInfoContainer}>
                   {/* Student Icon */}
                   <View style={styles.studentIcon}>
-                    <Text style={styles.studentIconText}>C{item.id}</Text>
+                    <Ionicons
+                      name='person-circle-outline'
+                      size={40}
+                      color='white'
+                    />
+                    {/* Icon representing the student */}
                   </View>
 
                   {/* Student Name and Details */}
                   <View style={styles.studentDetailsContainer}>
                     <Text style={styles.studentName}>{item.name}</Text>
                     <Text style={styles.studentDetails}>
-                      Birthday: {item.birthday}
+                      Birthday:{' '}
+                      {format(new Date(item.birthday), 'MMMM dd, yyyy')}
                     </Text>
                   </View>
                 </View>
@@ -221,11 +229,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#00796b',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  studentIconText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   studentDetailsContainer: {
     flex: 1,

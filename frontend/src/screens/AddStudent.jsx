@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {addStudent} from '../config/firebase'; // You'll create this function in firebase.js
-import ImagePickerExample from '../components/ImagePicker';
 
 const AddStudent = ({route, navigation}) => {
   const {classId} = route.params;

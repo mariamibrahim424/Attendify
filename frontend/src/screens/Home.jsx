@@ -100,7 +100,8 @@ const Home = ({route}) => {
                 }
               >
                 <View style={styles.classIcon}>
-                  <Text style={styles.classIconText}>C{item.id}</Text>
+                  {/* Updated icon style */}
+                  <Ionicons name='people-outline' size={30} color='white' />
                 </View>
                 <Text style={styles.classText}>{item.name}</Text>
               </TouchableOpacity>
